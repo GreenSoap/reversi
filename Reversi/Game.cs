@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.FSharp.Core;
+using FSAI;
 
 namespace Reversi
 {
@@ -165,6 +167,13 @@ namespace Reversi
             return Empty;
         }
 
+    public static byte ApplyGetWinner(byte[,] board)
+    {
+      var GetWinnerFunc = FuncConvert.ToFSharpFunc<byte[,], byte>(GetWinner);
+
+      return FSAI.Minimax.getWinner(GetWinnerFunc, board);
+    }
+
         public static List<Tuple<int, int>> GetFlippedPieces(byte[,] board, Tuple<int, int> move, byte tile)
         {
             int moveX = move.Item1, moveY = move.Item2;
@@ -314,6 +323,12 @@ namespace Reversi
             evaluation += (CountCorners(board, Black) - CountCorners(board, White)) * 100;
             return evaluation;
         }
+
+      public static int MinimaxAlphaBetaFS(byte[,] board, int depth, int alpha, int beta, byte tile, bool isMaximumPlayer)
+      {
+      
+        return 0;
+      }
 
         public static int MinimaxAlphaBeta(byte[,] board, int depth, int a, int b, byte tile, bool isMaxPlayer)
         {
