@@ -27,11 +27,50 @@ module GameLogic =
     if (tile <> Tile.White && tile <> Tile.Black) then error
     elif tile = Tile.White then Tile.Black else Tile.White      
     
-  let isValidMove (board: byte[,]) (tile: byte) (x: int) (y: int) =
-    true
+  // let isValidMove (board: byte[,]) (tile: byte) (x: int) (y: int) =
+  //  true
+
+  let isOnBoard x y =
+    // Check if coordinates are out of bounds
+    (0 <= x && x <= 7 && 0 <= y && y <= 7)
     
+  
+  let rec foundMoveInDirection x y tile (board: byte[,]) direction =
+    if board.[x, y] = tile then
+      true
+    else if board.[x, y] = Tile.Empty then
+      false
+    else
+      foundMoveInDirection (x + fst direction) (y + snd direction) tile board direction
+
+  let rec getMovesFromPosition x y (board: byte[,]) tile directions =
+    if directions = List.Empty then
+      []
+    else
+      match directions with
+      | head::tail ->
+        let dirX = x + fst head
+        let dirY = y + snd head
+        if (isOnBoard x y && board.[dirX, dirY] = getOpposingTile tile) then
+          let found = foundMoveInDirection dirX dirY tile board head
+          if found then
+            (x, y)::getMovesFromPosition x y board tile tail
+          else 
+            getMovesFromPosition x y board tile tail
+        else
+          getMovesFromPosition x y board tile tail
+
+
   let getValidMoves (board: byte[,]) (tile: byte) = 
-    Seq.map(fun (x, y) -> isValidMove board tile x y) (Seq.cast board)
+    let mutable validMoves = []
+    // Loop through the board
+    for x in 0..8 do
+      for y in 0..8 do
+        // If current position on board is Empty then evaluate it for a move
+        if (board.[x, y] = Tile.Empty) then
+          let moves = getMovesFromPosition x y board tile directions
+          validMoves <- moves @ validMoves
+    validMoves
 
   // Returns the amount of tiles in the board corresponding to the passed tile
   let getScore (board: byte[,]) (tile: byte) =
