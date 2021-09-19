@@ -30,14 +30,6 @@ module GameLogic =
     if (tile <> Tile.White && tile <> Tile.Black) then error
     elif tile = Tile.White then Tile.Black else Tile.White      
     
-  // let isValidMove (board: byte[,]) (tile: byte) (x: int) (y: int) =
-  //  true
-
-  let isOnBoard x y =
-    // Check if coordinates are out of bounds
-    (0 <= x && x <= 7 && 0 <= y && y <= 7)
-    
-  
   let rec foundMoveInDirection x y tile (board: byte[,]) direction =
     if not (isCoordinateInBounds (x, y)) || board.[x, y] = Tile.Empty then
       false
@@ -54,7 +46,7 @@ module GameLogic =
       | head::tail ->
         let dirX = x + fst head
         let dirY = y + snd head
-        if (isOnBoard dirX dirY && board.[dirX, dirY] = getOpposingTile tile) then
+        if (isCoordinateInBounds (dirX, dirY) && board.[dirX, dirY] = getOpposingTile tile) then
           let found = foundMoveInDirection dirX dirY tile board head
           if found then
             (x, y)::getMovesFromPosition x y board tile tail
@@ -130,29 +122,26 @@ module GameLogic =
 
   let getFlippedPieces (board: byte[,]) (tile: byte) (move: (int*int)) =
     let moveX, moveY = move
-
-    if board.[moveX, moveY] = Tile.Empty then
-
+    if board.[moveX, moveY] <> Tile.Empty then []
+    else 
       let rec getFlippedPiecesByDir (board: byte[,]) (tile: byte) (x: int, y: int) (directions: (int*int) list) =
         let x = x + fst directions.Head
         let y = y + snd directions.Head
 
         if isCoordinateInBounds(x, y) && board.[x, y] = getOpposingTile tile then
-          
+        
           let rec getDirFlippedPiecesArray (board: byte[,]) (tile: byte) (position: (int*int)) (direction: (int*int)) =
             let posX, posY = position
             let dirX, dirY = direction
             if board.[posX, posY] = getOpposingTile tile && board.[posX, posY] <> tile then
               getDirFlippedPiecesArray board tile (posX+dirX, posY+dirY) direction
             else []
-              
+            
           getDirFlippedPiecesArray board tile (x, y) directions.Head
         else
           getFlippedPiecesByDir board tile (x, y) directions.Tail
-
+  
       getFlippedPiecesByDir board tile (moveX, moveY) directions
-    else
-      []
           
   let makeMove (board: byte[,]) (move: (int*int)) (tile: byte) =
     let flippedPieces = getFlippedPieces board tile move
