@@ -197,10 +197,11 @@ module GameLogic =
               let posX, posY = position
               let dirX, dirY = direction
               if isCoordinateInBounds(posX, posY) && board.[posX, posY] = getOpposingTile tile then
-                getDirFlippedPiecesArray board tile (posX+dirX, posY+dirY) direction
+                (posX, posY)::getDirFlippedPiecesArray board tile (posX+dirX, posY+dirY) direction
               else []
             
-            getDirFlippedPiecesArray board tile (x, y) directions.Head
+            let flippedPiecesInDir = getDirFlippedPiecesArray board tile (x, y) directions.Head
+            flippedPiecesInDir @ getFlippedPiecesByDir board tile (x, y) directions.Tail
           else
             getFlippedPiecesByDir board tile (x, y) directions.Tail
   
