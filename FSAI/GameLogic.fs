@@ -29,7 +29,7 @@ module GameLogic =
   let getOpposingTile (tile: byte) =
     if (tile <> Tile.White && tile <> Tile.Black) then error
     elif tile = Tile.White then Tile.Black else Tile.White      
-    
+  
   let rec foundMoveInDirection x y tile (board: byte[,]) direction =
     if not (isCoordinateInBounds (x, y)) || board.[x, y] = Tile.Empty then
       false
@@ -59,8 +59,8 @@ module GameLogic =
   let getValidMoves (board: byte[,]) (tile: byte) = 
     let mutable validMoves = []
     // Loop through the board
-    for x in 0..7 do
-      for y in 0..7 do
+    for x in 0..boardLength-1 do
+      for y in 0..boardLength-1 do
         // If current position on board is Empty then evaluate it for a move
         if (board.[x, y] = Tile.Empty) then
           let moves = getMovesFromPosition x y board tile directions
@@ -78,7 +78,7 @@ module GameLogic =
     let whiteScore = getScore board Tile.White
 
     if isBoardFull blackScore whiteScore || blackScore = 0 || whiteScore = 0 ||
-      (Seq.length(getValidMoves board Tile.White) + Seq.length(getValidMoves board Tile.Black) = 0) then
+      ((getValidMoves board Tile.White).Length + (getValidMoves board Tile.Black).Length = 0) then
 
       if whiteScore > blackScore then Tile.White
       elif blackScore > whiteScore then Tile.Black
@@ -125,21 +125,23 @@ module GameLogic =
     if board.[moveX, moveY] <> Tile.Empty then []
     else 
       let rec getFlippedPiecesByDir (board: byte[,]) (tile: byte) (x: int, y: int) (directions: (int*int) list) =
-        let x = x + fst directions.Head
-        let y = y + snd directions.Head
+        if directions = List.Empty then
+          []
+        else 
+          let x = x + fst directions.Head
+          let y = y + snd directions.Head
 
-        if isCoordinateInBounds(x, y) && board.[x, y] = getOpposingTile tile then
-        
-          let rec getDirFlippedPiecesArray (board: byte[,]) (tile: byte) (position: (int*int)) (direction: (int*int)) =
-            let posX, posY = position
-            let dirX, dirY = direction
-            if board.[posX, posY] = getOpposingTile tile && board.[posX, posY] <> tile then
-              getDirFlippedPiecesArray board tile (posX+dirX, posY+dirY) direction
-            else []
+          if isCoordinateInBounds(x, y) && board.[x, y] = getOpposingTile tile then        
+            let rec getDirFlippedPiecesArray (board: byte[,]) (tile: byte) (position: (int*int)) (direction: (int*int)) =
+              let posX, posY = position
+              let dirX, dirY = direction
+              if isCoordinateInBounds(posX, posY) && board.[posX, posY] = getOpposingTile tile && board.[posX, posY] <> tile then
+                getDirFlippedPiecesArray board tile (posX+dirX, posY+dirY) direction
+              else []
             
-          getDirFlippedPiecesArray board tile (x, y) directions.Head
-        else
-          getFlippedPiecesByDir board tile (x, y) directions.Tail
+            getDirFlippedPiecesArray board tile (x, y) directions.Head
+          else
+            getFlippedPiecesByDir board tile (x, y) directions.Tail
   
       getFlippedPiecesByDir board tile (moveX, moveY) directions
           

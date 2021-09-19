@@ -167,13 +167,6 @@ namespace Reversi
             return Empty;
         }
 
-    public static byte ApplyGetWinner(byte[,] board)
-    {
-      var GetWinnerFunc = FuncConvert.ToFSharpFunc<byte[,], byte>(GetWinner);
-
-      return FSAI.Minimax.getWinner(GetWinnerFunc, board);
-    }
-
         public static List<Tuple<int, int>> GetFlippedPieces(byte[,] board, Tuple<int, int> move, byte tile)
         {
             int moveX = move.Item1, moveY = move.Item2;
@@ -324,12 +317,6 @@ namespace Reversi
             return evaluation;
         }
 
-      public static int MinimaxAlphaBetaFS(byte[,] board, int depth, int alpha, int beta, byte tile, bool isMaximumPlayer)
-      {
-      
-        return 0;
-      }
-
         public static int MinimaxAlphaBeta(byte[,] board, int depth, int a, int b, byte tile, bool isMaxPlayer)
         {
             // The heart of our AI. Minimax algorithm with alpha-beta pruning to speed up computation.
@@ -404,8 +391,8 @@ namespace Reversi
                     int nodeScore;
                     if (tile == Black)
                     {
-                        nodeScore = MinimaxAlphaBeta(childBoard, depth - 1, int.MinValue, int.MaxValue, OtherTile(tile), false);
-                        if (nodeScore > bestScore)
+            nodeScore = FSAI.Game.minimax(childBoard, OtherTile(tile), depth - 1, int.MaxValue, int.MinValue, false);
+;                        if (nodeScore > bestScore)
                         {
                             bestScore = nodeScore;
                             bestMove = move;
@@ -413,8 +400,8 @@ namespace Reversi
                     }
                     else
                     {
-                        nodeScore = MinimaxAlphaBeta(childBoard, depth - 1, int.MinValue, int.MaxValue, OtherTile(tile), true);
-                        if (nodeScore < bestScore)
+            nodeScore = FSAI.Game.minimax(childBoard, OtherTile(tile), depth - 1, int.MinValue, int.MaxValue, true);
+            if (nodeScore < bestScore)
                         {
                             bestScore = nodeScore;
                             bestMove = move;
