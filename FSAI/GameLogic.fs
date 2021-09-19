@@ -114,13 +114,14 @@ module GameLogic =
   /// Returns the winning Tile, Rule.Tie if it's a tie, or Tile.Empty if the game is not yet over
   /// </summary>
   let getWinner (board: byte[,]) = 
+    // Get the current scores of the players
     let blackScore = getScore board Tile.Black
     let whiteScore = getScore board Tile.White
 
-    // If the board is full and one of the players has 0 in score, 
-    // or if none of the players have any valid moves left 
+    // If the board is full or one of the players has 0 in score, 
+    // or if none of the players have any valid moves left
     if isBoardFull blackScore whiteScore || blackScore = 0 || whiteScore = 0 ||
-      ((getValidMoves board Tile.White).Length + (getValidMoves board Tile.Black).Length = 0) then
+      (getValidMoves board Tile.White).Length + (getValidMoves board Tile.Black).Length = 0 then
 
       if whiteScore > blackScore then Tile.White
       elif blackScore > whiteScore then Tile.Black
@@ -146,12 +147,12 @@ module GameLogic =
     // Get the current scores of the players
     let blackScore = getScore board Tile.Black
     let whiteScore = getScore board Tile.White
-    // Get ther movement options (more options = more mobility)
-    let blackMobility = Seq.length(getValidMoves board Tile.Black)
-    let whiteMobility = Seq.length(getValidMoves board Tile.White)
+    // Get their movement options (more options = more mobility)
+    let blackMobility = (getValidMoves board Tile.Black).Length
+    let whiteMobility = (getValidMoves board Tile.White).Length
 
     // Relative to black player
-    if blackScore = 0 then System.Int32.MinValue // If black ahs zero then thats good cause less is more
+    if blackScore = 0 then System.Int32.MinValue // If black has zero then that's good cause less is more
     elif whiteScore = 0 then System.Int32.MaxValue // If white has zero then (black has more in counter which is bad)
     else
       if isBoardFull blackScore whiteScore || blackMobility + whiteMobility = 0 then
@@ -197,7 +198,7 @@ module GameLogic =
               let posX, posY = position
               let dirX, dirY = direction
               if isCoordinateInBounds(posX, posY) && board.[posX, posY] = getOpposingTile tile then
-                getDirFlippedPiecesArray board tile (posX+dirX, posY+dirY) direction
+                getDirFlippedPiecesArray board tile (posX+dirX, posY+dirY) direction 
               else []
             
             getDirFlippedPiecesArray board tile (x, y) directions.Head

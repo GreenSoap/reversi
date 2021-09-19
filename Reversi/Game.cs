@@ -23,6 +23,7 @@ namespace Reversi
 
   static Random rng = new Random();
 
+
   public static int ToIndex1D(int x, int y)
   {
     if (IsOnBoard(x, y))
