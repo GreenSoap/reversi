@@ -39,10 +39,10 @@ module GameLogic =
     
   
   let rec foundMoveInDirection x y tile (board: byte[,]) direction =
-    if board.[x, y] = tile then
-      true
-    else if board.[x, y] = Tile.Empty then
+    if not (isCoordinateInBounds (x, y)) || board.[x, y] = Tile.Empty then
       false
+    else if  board.[x, y] = tile then
+      true
     else
       foundMoveInDirection (x + fst direction) (y + snd direction) tile board direction
 
@@ -54,7 +54,7 @@ module GameLogic =
       | head::tail ->
         let dirX = x + fst head
         let dirY = y + snd head
-        if (isOnBoard x y && board.[dirX, dirY] = getOpposingTile tile) then
+        if (isOnBoard dirX dirY && board.[dirX, dirY] = getOpposingTile tile) then
           let found = foundMoveInDirection dirX dirY tile board head
           if found then
             (x, y)::getMovesFromPosition x y board tile tail
@@ -67,8 +67,8 @@ module GameLogic =
   let getValidMoves (board: byte[,]) (tile: byte) = 
     let mutable validMoves = []
     // Loop through the board
-    for x in 0..8 do
-      for y in 0..8 do
+    for x in 0..7 do
+      for y in 0..7 do
         // If current position on board is Empty then evaluate it for a move
         if (board.[x, y] = Tile.Empty) then
           let moves = getMovesFromPosition x y board tile directions
