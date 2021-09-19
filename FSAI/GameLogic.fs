@@ -23,9 +23,14 @@ module GameLogic =
     (1, -1)
   ]
 
-  // Returns whether or not the coordinate is within the boundries of the board
+  /// <summary>
+  /// Returns whether or not the coordinate is within the boundries of the board
+  /// </summary>
   let isCoordinateInBounds (x: int, y: int) = (0 <= x && x < boardLength && 0 <= y && y < boardLength)
-
+ 
+  /// <summary>
+  /// Returns the Tile opposing the passed tile
+  /// </summary>
   let getOpposingTile (tile: byte) =
     if (tile <> Tile.White && tile <> Tile.Black) then error
     elif tile = Tile.White then Tile.Black else Tile.White      
@@ -67,16 +72,26 @@ module GameLogic =
           validMoves <- moves @ validMoves
     validMoves
 
-  // Returns the amount of tiles in the board corresponding to the passed tile
+  /// <summary>
+  /// Returns the amount of tiles in the board corresponding to the passed tile
+  /// </summary>
   let getScore (board: byte[,]) (tile: byte) =
     Seq.length((Seq.filter(fun cell -> cell = tile) (Seq.cast board)))
   
+  /// <summary>
+  /// Returns whether or not the board is full of Tiles based on the players' score.
+  /// </summary>
   let isBoardFull blackScore whiteScore = (blackScore + whiteScore = (boardLength * boardLength))
 
+  /// <summary>
+  /// Returns the winning Tile, Rule.Tie if it's a tie, or Tile.Empty if the game is not yet over
+  /// </summary>
   let getWinner (board: byte[,]) = 
     let blackScore = getScore board Tile.Black
     let whiteScore = getScore board Tile.White
 
+    // If the board is full and one of the players has 0 in score, 
+    // or if none of the players have any valid moves left 
     if isBoardFull blackScore whiteScore || blackScore = 0 || whiteScore = 0 ||
       ((getValidMoves board Tile.White).Length + (getValidMoves board Tile.Black).Length = 0) then
 
@@ -86,6 +101,9 @@ module GameLogic =
     else
       Tile.Empty
 
+  /// <summary>
+  /// Get the amount of cornered tiles in the board corresponding to the passed tile 
+  /// </summary>
   let getNonEmptyCornerTileAmount(board: byte[,]) (tile: byte) =
     (List.filter(fun corner -> corner = tile) [
       board.[0, 0];
@@ -94,23 +112,23 @@ module GameLogic =
       board.[boardLength-1, boardLength-1]
     ]).Length
 
-  // Minimax evaluation 
+  /// <summary>
+  /// Makes an evaluation on how good the board is for the players. The higher the return value, the more advantageous for Tile.White.
+  /// </summary>
   let getBoardEvaluation(board: byte[,]) =
     let blackScore = getScore board Tile.Black
     let whiteScore = getScore board Tile.White
     let blackMobility = Seq.length(getValidMoves board Tile.Black)
     let whiteMobility = Seq.length(getValidMoves board Tile.White)
 
-    if blackScore = 0 then
-        -200000
-    elif whiteScore = 0 then
-        200000
+    if blackScore = 0 then System.Int32.MinValue
+    elif whiteScore = 0 then System.Int32.MaxValue
     else
       if isBoardFull blackScore whiteScore || blackMobility + whiteMobility = 0 then
         if (blackScore < whiteScore) then
-            -100000 - whiteScore + blackScore
+            (System.Int32.MinValue / 2) - whiteScore + blackScore
         elif (blackScore > whiteScore) then
-            100000 + blackScore - whiteScore
+            (System.Int32.MaxValue / 2) + blackScore - whiteScore
         else
             0
       else
@@ -135,7 +153,7 @@ module GameLogic =
             let rec getDirFlippedPiecesArray (board: byte[,]) (tile: byte) (position: (int*int)) (direction: (int*int)) =
               let posX, posY = position
               let dirX, dirY = direction
-              if isCoordinateInBounds(posX, posY) && board.[posX, posY] = getOpposingTile tile && board.[posX, posY] <> tile then
+              if isCoordinateInBounds(posX, posY) && board.[posX, posY] = getOpposingTile tile then
                 getDirFlippedPiecesArray board tile (posX+dirX, posY+dirY) direction
               else []
             
@@ -144,13 +162,19 @@ module GameLogic =
             getFlippedPiecesByDir board tile (x, y) directions.Tail
   
       getFlippedPiecesByDir board tile (moveX, moveY) directions
-          
+  
+  /// <summary>
+  /// Changes the tiles of the flippable pieces to the corresponding tile, as well as the clicked tile.
+  /// </summary>
   let makeMove (board: byte[,]) (move: (int*int)) (tile: byte) =
     let flippedPieces = getFlippedPieces board tile move
     let boardCopy = Array2D.copy board
+
+    // Add the flipped pieces to the new board.
     for flippedPiece in flippedPieces do
       boardCopy.[fst flippedPiece, snd flippedPiece] <- tile
 
+    // If there were any flipped pieces, change the tile of the tiled moved to.
     if flippedPieces.Length > 0 then
       boardCopy.[fst move, snd move] <- tile
       boardCopy
