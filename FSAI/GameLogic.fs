@@ -143,13 +143,16 @@ module GameLogic =
   /// Makes an evaluation on how good the board is for the players. The higher the return value, the more advantageous for Tile.White.
   /// </summary>
   let getBoardEvaluation(board: byte[,]) =
+    // Get the current scores of the players
     let blackScore = getScore board Tile.Black
     let whiteScore = getScore board Tile.White
+    // Get ther movement options (more options = more mobility)
     let blackMobility = Seq.length(getValidMoves board Tile.Black)
     let whiteMobility = Seq.length(getValidMoves board Tile.White)
 
-    if blackScore = 0 then System.Int32.MinValue
-    elif whiteScore = 0 then System.Int32.MaxValue
+    // Relative to black player
+    if blackScore = 0 then System.Int32.MinValue // If black ahs zero then thats good cause less is more
+    elif whiteScore = 0 then System.Int32.MaxValue // If white has zero then (black has more in counter which is bad)
     else
       if isBoardFull blackScore whiteScore || blackMobility + whiteMobility = 0 then
         if (blackScore < whiteScore) then
@@ -162,7 +165,9 @@ module GameLogic =
         if blackScore + whiteScore > 55 then
             blackScore - whiteScore
         else
+          // Value mobility some amount (the more options the better)
           ((blackScore - whiteScore) + (blackMobility - whiteMobility) * 10) + 
+          // Valye corners a lot (relative to black)
           (getNonEmptyCornerTileAmount board Tile.Black - getNonEmptyCornerTileAmount board Tile.White) * 100
 
   /// <summary>
