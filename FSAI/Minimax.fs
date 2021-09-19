@@ -1,10 +1,16 @@
 ﻿namespace FSAI
 
 module Game =
-  // Minimax algo with alpha-beta pruning to disregard inconsequential parts of the tree
+  /// <summary>
+  /// Minimax algo with alpha-beta pruning to disregard inconsequential parts of the tree
+  /// </summary>
+  /// <param name="board">Current board</param>
+  /// <param name="tile">The player's Tile</param>
+  /// <param name="depth">How many moves ahead to search</param>
+  /// <param name="alpha">Best score achievable by maximizing player</param>
+  /// <param name="beta">Best score achievable by minimizing player</param>
+  /// <param name="isMaximizingPlayer">Whether or not it is the player favoring higher evaluation</param>
   let rec minimax (board: byte[,]) (tile: byte) (depth: int) (alpha: int) (beta: int) (isMaximizingPlayer: bool) =
-      // Return static evaluation if the leaf has no more children, or the game is over.
-
       // When max depth is reached and Game is not over yet then do general eval on rest of tree 
       if depth = 0 || GameLogic.getWinner board <> Tile.Empty then
         GameLogic.getBoardEvaluation board

@@ -61,8 +61,8 @@ module GameLogic =
     if directions = List.Empty then
       []
     else
-      // Could've match with empty List here not too late to commit now
       match directions with
+      | [] -> []
       | head::tail ->
         // Take first step towards direction
         let dirX = x + fst head // head -> x (direction)
@@ -163,6 +163,7 @@ module GameLogic =
         else
             0
       else
+        // If almost half the board is full
         if blackScore + whiteScore > 55 then
             blackScore - whiteScore
         else
@@ -172,11 +173,11 @@ module GameLogic =
           (getNonEmptyCornerTileAmount board Tile.Black - getNonEmptyCornerTileAmount board Tile.White) * 100
 
   /// <summary>
-  /// 
+  /// If the passed move results in any flipped pieces, a list of the flipped piece coordinates is returned.
   /// </summary>
-  /// <param name="board"></param>
-  /// <param name="move"></param>
-  /// <param name="tile"></param>
+  /// <param name="board">The board</param>
+  /// <param name="move">The move to make</param>
+  /// <param name="tile">The tile of the player</param>
   let getFlippedPieces (board: byte[,]) (tile: byte) (move: (int*int)) =
     // destructure the move made
     let moveX, moveY = move
@@ -184,8 +185,7 @@ module GameLogic =
     else 
       // Function for looping through all directions one by one and merging results
       let rec getFlippedPiecesByDir (board: byte[,]) (tile: byte) (x: int, y: int) (directions: (int*int) list) =
-        if directions = List.Empty then
-          []
+        if directions = List.Empty then []
         else 
           // Make step towrds direction
           let x = x + fst directions.Head
@@ -209,7 +209,7 @@ module GameLogic =
       getFlippedPiecesByDir board tile (moveX, moveY) directions
   
   /// <summary>
-  /// Changes the tiles of the flippable pieces to the corresponding tile, as well as the clicked tile.
+  /// Changes the tiles of the flippable pieces to the corresponding tile, as well as the tile moved to.
   /// </summary>
   let makeMove (board: byte[,]) (move: (int*int)) (tile: byte) =
     let flippedPieces = getFlippedPieces board tile move
